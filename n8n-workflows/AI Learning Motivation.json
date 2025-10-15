@@ -1,0 +1,209 @@
+{
+  "name": "AI Learning Motivation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 21
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4c8f6b0c-fb46-47ce-8212-3d358480b847",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://zenquotes.io/api/random",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b3c313a3-e9ce-447d-851f-cd34090cf82f",
+      "name": "Get Quote"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "afdd63b0-7157-4eba-8222-98801ba99ecb",
+              "name": "quote",
+              "value": "={{ $json[0].q }}",
+              "type": "string"
+            },
+            {
+              "id": "8b258ca7-0b84-4f69-bb08-6ba62874ea42",
+              "name": "author",
+              "value": "={{ $json[0].a }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "d4108b11-d9c1-4ef7-abe7-8b634aa999cb",
+      "name": "Extract Quote"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAvT_xBtlD0p8rg6ga5kOHi3O4t0r4MlPw",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [{\n    \"parts\": [{\n      \"text\": \"Rewrite this quote to be specifically motivational for someone learning AI Engineering and aiming for a job in Abu Dhabi. Keep it under 100 words and make it actionable. Original quote: {{ $('Extract Quote').first().json.quote }} - {{ $('Extract Quote').first().json.author }}\"\n    }]\n  }]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "f2da1399-0631-4cba-91ce-1b712c66af29",
+      "name": "AI Rewrite"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "96d0296c-1239-4585-8622-fcc4cd8b2506",
+              "name": "aiMessage",
+              "value": "={{ $json.candidates[0].content.parts[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        832,
+        0
+      ],
+      "id": "e4bccd02-43b1-4dc0-802e-50465a051398",
+      "name": "Extract AI Response"
+    },
+    {
+      "parameters": {
+        "sendTo": "mmgmahdi@gmail.com",
+        "subject": "=Daily AI Learning Motivation - Day {{ DateTime.now().toFormat('D') }}",
+        "message": "=<h2>🚀 Your Daily AI Learning Motivation</h2> <p><strong>{{ $json.aiMessage }}</strong></p> <hr> <p><em>Day 1 of 180 - Let's build your future in Abu Dhabi! 🇦🇪</em></p> ```",
+        "options": {}
+      },
+      "id": "a86cc555-4dd1-4eff-af88-f7052e79c92a",
+      "name": "Send Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        992,
+        0
+      ],
+      "webhookId": "0953abd5-e713-4271-9b9b-6221ab4acb02",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "5tQgkjBTaDprug3V",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Quote",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Quote": {
+      "main": [
+        [
+          {
+            "node": "Extract Quote",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Quote": {
+      "main": [
+        [
+          {
+            "node": "AI Rewrite",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Rewrite": {
+      "main": [
+        [
+          {
+            "node": "Extract AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract AI Response": {
+      "main": [
+        [
+          {
+            "node": "Send Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ecc07171-5f3a-4b5d-9426-5f2a8d96e5c6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "caefe8b9f493175b253a97a48da3922a2f2a105bb013ec4ec8ae43d0fe5abb66"
+  },
+  "id": "2DfkTydo3zn7kI62",
+  "tags": []
+}

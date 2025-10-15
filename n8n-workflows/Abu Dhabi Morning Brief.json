@@ -1,0 +1,328 @@
+{
+  "name": "Abu Dhabi Morning Brief",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -16,
+        -16
+      ],
+      "id": "32391fb3-72ca-4ff4-9da8-4e2ea725b07b",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast?latitude=24.4539&longitude=54.3773&current=temperature_2m,relative_humidity_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Asia/Dubai",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        336,
+        -240
+      ],
+      "id": "6db13af2-a6ea-4954-ab5a-d8972703e129",
+      "name": "Get Weather"
+    },
+    {
+      "parameters": {
+        "url": "https://www.goldapi.io/api/XAU/USD",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-access-token",
+              "value": "goldapi-q738vsmgf8z9wm-io"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        336,
+        -16
+      ],
+      "id": "87786f56-35f4-4444-992b-68e0668113f2",
+      "name": "Get Gold Price"
+    },
+    {
+      "parameters": {
+        "url": "https://newsapi.org/v2/everything?q=artificial+intelligence+Abu+Dhabi&language=en&sortBy=publishedAt&pageSize=3&apiKey=da0778c925904d98a11c3c2e46f8866a",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        336,
+        208
+      ],
+      "id": "8ae7672a-ad29-40f5-845f-a2c047894ec5",
+      "name": "Get News"
+    },
+    {
+      "parameters": {
+        "jsCode": "// This node now reads the structured data output by the Merge Node AND \n// the new variables attached by the Python Node (Node 5).\n\n// The Python Node (5) attached its output to the first item's JSON (index 0).\nconst weatherData = $input.all()[0].json;\nconst goldData = $input.all()[1].json;\nconst newsData = $input.all()[2].json;\n\n// Extract new variables from the item modified by the Python script\nconst riskScore = weatherData.gold_risk_score;\nconst riskSummary = weatherData.gold_risk_summary;\n\n\n// Extract Weather Summary \nconst temp = weatherData.current.temperature_2m;\nconst humidity = weatherData.current.relative_humidity_2m;\nconst high = weatherData.daily.temperature_2m_max[0];\nconst low = weatherData.daily.temperature_2m_min[0];\nconst weatherSummary = `Current: ${temp}°C, ${humidity}% humidity. Forecast: High ${high}°C, Low ${low}°C.`;\n\n\n// Extract Top News Titles \nconst topNews = newsData.articles.map((article, i) => \n    `${i+1}. ${article.title}`\n).join('\\n');\n\n\n// -----------------------------------------------------------\n// CONSTRUCT PROMPT: Including the new Python Analysis\n// -----------------------------------------------------------\nconst briefingPrompt = `\n**TASK:** Create a concise, energetic morning briefing for a professional in Abu Dhabi, suitable for email delivery. Use the provided data only.\n\n**DATA:**\nWEATHER:\n${weatherSummary}\n\nGOLD MARKET (XAU/USD):\nCurrent Price: $${goldData.price}\n24h Change: ${goldData.ch} (${goldData.chp}%)\n**VOLATILITY ANALYSIS (Python):** Score ${riskScore}/5. ${riskSummary}\n\nTOP AI/TECH NEWS:\n${topNews}\n\n**STYLE GUIDE:**\n1. Keep the total length under 200 words.\n2. Maintain a professional, positive, and forward-looking tone.\n3. Add relevant emojis.\n4. Integrate the Gold Volatility Analysis into the summary.\n5. End with a motivational note about the user's \"AI Engineer Journey\" (Day 3 of 180).\n`;\n\nreturn [\n  {\n    json: {\n      prompt: briefingPrompt,\n      goldPrice: goldData.price\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        -16
+      ],
+      "id": "5be5e87e-e8ba-42cb-91da-6ce10346fe9e",
+      "name": "Combine & Create AI Prompt"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        656,
+        -32
+      ],
+      "id": "39dd592d-9387-4d8e-bed0-6338eb18ed4a",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-goog-api-key",
+              "value": "AIzaSyCb35a-SAZDprrksOEIB_QTMZ2hN0tRwnE"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ \"contents\": [ { \"parts\": [ { \"text\": $json.prompt } ] } ] }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1152,
+        -16
+      ],
+      "id": "6bba1ded-4f17-43e1-8868-8bd48d02a53a",
+      "name": "AI Generation"
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiResponse = $input.first().json;\n// Safely extract the generated text\nconst briefing = aiResponse.candidates[0].content.parts[0].text;\n\nreturn [\n  {\n    json: {\n      briefing_text: briefing\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        -16
+      ],
+      "id": "a87d5272-ffc7-4933-a323-9ee02efdd011",
+      "name": "Extract AI Response"
+    },
+    {
+      "parameters": {
+        "jsCode": "const briefing = $input.first().json.briefing_text;\n\n// Create the date string for the header\nconst options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };\nconst dateString = new Date().toLocaleDateString('en-US', options);\nconst simpleDate = new Date().toLocaleDateString();\n\nconst emailBody = `\n<!DOCTYPE html>\n<html>\n<head>\n<style>\n  body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; }\n  .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }\n  .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; color: white; }\n  .content { padding: 30px; }\n  .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; }\n  h1 { margin-top: 0; }\n  .briefing-content { white-space: pre-wrap; text-align: left; } /* Preserves AI line breaks */\n</style>\n</head>\n<body>\n<div class=\"container\">\n  <div class=\"header\">\n    <h1>🌅 Abu Dhabi Morning Brief</h1>\n    <p>${dateString}</p>\n  </div>\n  <div class=\"content\">\n    <div class=\"briefing-content\">${briefing}</div>\n  </div>\n  <div class=\"footer\">\n    <p>Automated by your n8n + Gemini AI system</p>\n    <p>Day 2 of 180 - AI Engineer Journey 🚀</p>\n  </div>\n</div>\n</body>\n</html>\n`;\n\nreturn [\n  {\n    json: {\n      subject: `🌅 Abu Dhabi Morning Brief - ${simpleDate}`,\n      body: emailBody\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        -16
+      ],
+      "id": "965f3717-9335-4f95-abdd-7d64c2a2c2b5",
+      "name": "Format Email"
+    },
+    {
+      "parameters": {
+        "sendTo": "mmgmahdi@gmail.com",
+        "subject": "=={{ $json.subject }}",
+        "message": "=={{ $json.body }}",
+        "options": {}
+      },
+      "id": "c2fa6ab5-fe3f-426b-be88-cb77d9b7fbb5",
+      "name": "Send Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1792,
+        -16
+      ],
+      "webhookId": "0953abd5-e713-4271-9b9b-6221ab4acb02",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "5tQgkjBTaDprug3V",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "# ----------------------------------------------------------------------\n# PYTHON CODE NODE: Gold Market Risk Scorer\n# This script analyzes the 24-hour gold price percentage change (chp)\n# and assigns a risk score (1-5) based on volatility.\n# ----------------------------------------------------------------------\n\n# 1. Access the Data\n# Safely assign the input items array to a standard Python variable.\ninput_items = _items \n\n# Gold data is the second item (index 1) in the merged list.\n# We access the JSON data directly from the list item.\ngold_data = input_items[1]['json']\nchange_percent = gold_data.get('chp', 0.0) # Get the change percentage, default to 0.0 if missing\n\n# 2. Define the Risk Scoring Logic\ndef calculate_risk_score(chp):\n    \"\"\"Calculates a risk score (1-5) based on volatility (absolute change %).\"\"\"\n    # Use absolute value to measure volatility regardless of gain or loss\n    abs_chp = abs(chp)\n    \n    if abs_chp >= 1.5:\n        # High volatility - movement of 1.5% or more in 24h\n        return 5, \"EXTREME VOLATILITY. Potential major market shift.\"\n    elif abs_chp >= 1.0:\n        # Significant volatility\n        return 4, \"High volatility detected. Watch closely.\"\n    elif abs_chp >= 0.5:\n        # Moderate volatility (normal trading day)\n        return 3, \"Moderate volatility. Standard market movement.\"\n    elif abs_chp >= 0.2:\n        # Low volatility\n        return 2, \"Low volatility. Consolidation period.\"\n    else:\n        # Very low volatility / flat market\n        return 1, \"Very low volatility. Market currently flat.\"\n\n# 3. Execute Analysis and Structure Output\nrisk_score, summary = calculate_risk_score(change_percent)\n\n# We append the new analysis data to the first existing item (index 0).\n# This ensures the other inputs pass through and the next node (Combine Prompt) \n# can access all data cleanly.\ninput_items[0]['json']['gold_risk_score'] = risk_score\ninput_items[0]['json']['gold_risk_summary'] = summary\ninput_items[0]['json']['gold_change_percent'] = change_percent\n\nreturn input_items\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        -16
+      ],
+      "id": "4e399f1b-5948-483e-83b0-47c14fed9a2b",
+      "name": "Python Risk Analysis"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Get Weather",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Gold Price",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Weather": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Gold Price": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get News": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Combine & Create AI Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Python Risk Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Generation": {
+      "main": [
+        [
+          {
+            "node": "Extract AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract AI Response": {
+      "main": [
+        [
+          {
+            "node": "Format Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Email": {
+      "main": [
+        [
+          {
+            "node": "Send Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Python Risk Analysis": {
+      "main": [
+        [
+          {
+            "node": "Combine & Create AI Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d130eb55-7d96-4a70-87cc-cec80a024a02",
+  "meta": {
+    "instanceId": "caefe8b9f493175b253a97a48da3922a2f2a105bb013ec4ec8ae43d0fe5abb66"
+  },
+  "id": "b856wNhPJDFB1kWj",
+  "tags": []
+}
