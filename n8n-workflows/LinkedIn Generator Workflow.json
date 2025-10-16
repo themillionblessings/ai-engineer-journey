@@ -1,0 +1,175 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 21
+            },
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0de180d7-5759-48b6-bec0-b8bb1172382c",
+      "name": "Daily Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// --- Data Structures (Converted from Python Day 3) ---\n\n// EXERCISE 1: AI PROJECT PORTFOLIO\nconst portfolio = [\n    {\"name\": \"Chatbot Prototype\", \"status\": \"Completed\", \"type\": \"NLP\", \"priority\": \"High\"},\n    {\"name\": \"Image Classifier\", \"status\": \"In Progress\", \"type\": \"CV\", \"priority\": \"High\"},\n    {\"name\": \"Daily Expense Tracker\", \"status\": \"Completed\", \"type\": \"Automation\", \"priority\": \"Medium\"},\n    {\"name\": \"Gold Trend Predictor\", \"status\": \"In Progress\", \"type\": \"Finance\", \"priority\": \"High\"},\n    {\"name\": \"Weather Data Pipeline\", \"status\": \"Completed\", \"type\": \"Automation\", \"priority\": \"Medium\"},\n    {\"name\": \"Neural Network Basics\", \"status\": \"Planned\", \"type\": \"ML\", \"priority\": \"Low\"},\n];\n\n// EXERCISE 2: TRANSACTION DATA\nconst transactions = [\n    {\"vendor\": \"Gym Membership\", \"amount\": 350.00, \"category\": \"Health\", \"date\": \"2025-10-15\"},\n    {\"vendor\": \"Udemy Course\", \"amount\": 199.99, \"category\": \"Learning\", \"date\": \"2025-10-15\"},\n    {\"vendor\": \"Python Academy\", \"amount\": 250.00, \"category\": \"Learning\", \"date\": \"2025-10-16\"},\n    {\"vendor\": \"Cloud Compute\", \"amount\": 45.50, \"category\": \"Infrastructure\", \"date\": \"2025-10-16\"},\n];\n\n// --- Functions to Generate Summary Strings ---\n\nfunction generatePortfolioSummary() {\n    let totalProjects = portfolio.length;\n    let statusCounts = {}; \n\n    for (const project of portfolio) {\n        let status = project.status;\n        statusCounts[status] = (statusCounts[status] || 0) + 1;\n    }\n    \n    let summary = [];\n    summary.push(`Total Projects: ${totalProjects}`);\n    summary.push(`Completed: ${statusCounts['Completed'] || 0}`);\n    summary.push(`In Progress: ${statusCounts['In Progress'] || 0}`);\n    summary.push(`Planned: ${statusCounts['Planned'] || 0}`);\n    summary.push(\"--- Detailed Status ---\");\n    \n    for (const project of portfolio) {\n        summary.push(`• ${project.name} (${project.type}): ${project.status}`);\n    }\n        \n    return summary.join(\"\\n\");\n}\n\nfunction generateTransactionSummary() {\n    let totalSpent = 0;\n    let learningSpent = 0;\n    \n    for (const tx of transactions) {\n        totalSpent += tx.amount;\n        if (tx.category === \"Learning\") {\n            learningSpent += tx.amount;\n        }\n    }\n\n    let summary = [];\n    //toFixed(2) handles currency formatting\n    summary.push(`Overall Total Spent: AED ${totalSpent.toFixed(2)}`);\n    summary.push(`--- Learning Expenses ---`);\n    \n    // List learning-related transactions\n    for (const tx of transactions) {\n        if (tx.category === \"Learning\") {\n            summary.push(`• ${tx.vendor} - AED ${tx.amount.toFixed(2)}`);\n        }\n    }\n    \n    summary.push(`Total Learning Spend: AED ${learningSpent.toFixed(2)}`);\n    \n    return summary.join(\"\\n\");\n}\n\n\n// --- Main Execution for n8n Output ---\n\nconst portfolioStatus = generatePortfolioSummary();\nconst transactionsInfo = generateTransactionSummary();\n\n// Final structured data to be passed to the next node (Gemini)\nconst outputItem = {\n    // n8n's Code node is run in JavaScript and automatically provides the 'new Date()' object.\n    \"date\": new Date().toISOString().split('T')[0], \n    \"day_number\": 3,\n    \"topic\": \"Python Persistence, Lists, Dictionaries, and Data Modeling.\",\n    \"key_skills\": [\"File Handling (JSON/CSV)\", \"List Comprehensions\", \"Nested Data Structures\", \"Data Aggregation\"],\n    \"portfolio_status\": portfolioStatus,\n    \"transactions_info\": transactionsInfo\n};\n\n// Return the result as an array of items for n8n (standard JS practice)\nreturn [outputItem];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "db583a8a-4d68-40d5-a5ad-101a72933166",
+      "name": "Fetch Data from Python File"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b58040df-c420-4c1e-b2ea-0ca8db9e4589",
+              "name": "linkedInPost",
+              "value": "={{ $json.content.parts[0].text }}",
+              "type": "string"
+            },
+            {
+              "id": "2829c8e6-b1db-4fb1-98d4-ab8c7a84358b",
+              "name": "date ",
+              "value": "={{ $items(\"Fetch Data from Python File\")[0].json.date }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        768,
+        0
+      ],
+      "id": "d6011998-227e-45c9-95ff-714d757fdaac",
+      "name": "Format Final Post"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are an enthusiastic AI Engineer in training. Your task is to write a highly engaging and professional LinkedIn post about your daily progress.\n\nPersona Rules:\n1. Enthusiastic and professional tone.\n2. Use relevant hashtags (e.g., #AIEngineer, #Python, #Automation, #DataStructures).\n3. Use emojis generously (max 5-7).\n4. The post must start with a compelling hook.\n5. The final output MUST contain ONLY the post content itself, with no introductory text, titles, or commentary.",
+              "role": "model"
+            },
+            {
+              "content": "=Write a LinkedIn post about my progress for Day {{ $('Fetch Data from Python File').item(0).json.day_number }}.\n\nToday's main focus was: {{ $('Fetch Data from Python File').item(0).json.topic }}\n\nKey skills mastered: {{ $('Fetch Data from Python File').item(0).json.key_skills.join(\", \") }}.\n\nHere is the status of my work, including the results from the daily exercises (use this data to make the post specific and impressive, but do not paste the raw numbers unless necessary):\n\n{{ $('Fetch Data from Python File').item(0).json.portfolio_status }}\n\n{{ $('Fetch Data from Python File').item(0).json.transactions_info }}\n\nMake the post about the importance of persistence (file handling) and how mastering Python data structures is key to building complex AI systems."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "a452ebe2-2f81-4378-9c8a-3b5509ac6296",
+      "name": "Generate LinkedIn Post",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "C8VO0ntM7KDvglXt",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "person": "=mohamed-gaber-ba7205311",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        976,
+        0
+      ],
+      "id": "f58c07fc-0c38-406e-b9af-a33c7d99a9d9",
+      "name": "Create a post",
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "wh8Ycz1rboflWTea",
+          "name": "LinkedIn account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Data from Python File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Data from Python File": {
+      "main": [
+        [
+          {
+            "node": "Generate LinkedIn Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate LinkedIn Post": {
+      "main": [
+        [
+          {
+            "node": "Format Final Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Final Post": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "98b166c5-8abc-4496-80f6-6594328989b8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "caefe8b9f493175b253a97a48da3922a2f2a105bb013ec4ec8ae43d0fe5abb66"
+  },
+  "id": "zGAZaFIgle4uFWXE",
+  "tags": []
+}

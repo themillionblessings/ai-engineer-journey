@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1760623379631,
+        "vendor": "Gym Membership",
+        "amount": 350.0,
+        "category": "Health",
+        "date": "2025-10-16"
+    },
+    {
+        "id": 1760623399979,
+        "vendor": "Udemy Course",
+        "amount": 199.99,
+        "category": "Learning",
+        "date": "2025-10-16"
+    }
+]

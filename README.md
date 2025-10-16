@@ -1,68 +1,56 @@
-## **🚀 My AI Engineer Journey \- 180 Days to Abu Dhabi**
+# **Project: AI Engineering Daily Progress Tracker**
 
-**Goal:** Become a job-ready AI Engineer specializing in RAG systems and secure a position in Abu Dhabi.
+## **🚀 Overview**
 
-**Timeline:** October 14, 2025 \- April 12, 2026 (180 days)
+This repository documents my daily progress in the AI Engineering journey, focusing on two distinct tracks: **Foundational Python Development** and **Workflow Automation**.
 
-**Target Role:** AI Engineer (RAG Specialist)
+It includes production-ready Python scripts for data handling and an automated low-code n8n workflow for content delivery.
 
-## **📊 Progress Tracker**
+## **🛠️ Core Technologies & Structure**
 
-**Current Day:** 2 / 180
+| Feature | Technologies Used | Directory |
+| :---- | :---- | :---- |
+| **Foundations** | Python (3.x), JSON, CSV | python-practice/ |
+| **Automation** | n8n, LinkedIn Marketing API, DevTools | n8n-workflows/ |
+| **Documentation** | Markdown, Git | Root Directory |
+| **Data Storage** | JSON, Excel (as source data) | data/ |
 
-**Skills Learned:** 7
+## **1\. Foundational Python Progress**
 
-**Projects Built:** 2
+The focus has been on mastering data persistence, serialization, and creating utility applications.
 
-**GitHub Commits:** 1
+### **Key Applications & Skills Mastered:**
 
-## **🛠️ Skills Acquired**
+* **Personal Finance Tracker (python-practice/day3\_expense\_tracker.py):**  
+  * A command-line application for tracking expenses.  
+  * **Skill:** Robust **JSON file handling** for data saving and loading.  
+  * **Skill:** Calculating and displaying a financial summary with breakdown by category.  
+* **Data Structures Practice (python-practice/day3\_data\_structures.py):**  
+  * **Skill:** Practical use of Lists, Dictionaries, and Sets for efficient data manipulation.
 
-### **Week 1 (Days 1-2)**
+## **2\. Workflow Automation (n8n & LinkedIn)**
 
-* \[x\] Python basics (variables, functions, I/O)  
-* \[x\] Conditionals (if/elif/else)  
-* \[x\] Loops (for, while)  
-* \[x\] APIs fundamentals  
-* \[x\] n8n workflow automation  
-* \[x\] Gemini AI integration  
-* \[x\] Git & GitHub basics
+This track focuses on creating a fully automated system for publishing daily progress updates to LinkedIn.
 
-## **💼 Projects Portfolio**
+### **System Components:**
 
-### **1\. AI Daily Motivation System (Day 1\)**
+1. **Daily Trigger:** Sets the workflow schedule (e.g., Cron job).  
+2. **Data Fetch:** Retrieves progress data (e.g., the JSON output from the Python expense tracker).  
+3. **Content Generation:** Uses an LLM to generate a professional, engaging LinkedIn post based on the fetched data.  
+4. **LinkedIn Post Node:** Publishes the finalized content.
 
-* **Tech:** n8n, Gemini API, Gmail  
-* **Features:** Automated daily AI-generated motivational emails  
-* **Status:** ✅ Live and running  
-* **Code:** See n8n-workflows/ for the JSON and src/ for supporting code.
+### **🔑 Technical Breakthrough: LinkedIn API User ID**
 
-### **2\. Abu Dhabi Morning Intelligence Briefing (Day 2\)**
+The primary challenge was securely identifying the user for the posting node. We overcame this by using **DevTools deep debugging** to capture the specific /me? API endpoint. This allowed us to retrieve the non-public and essential urn:li:person:\[ID\] required to maintain a persistent, authorized connection for content posting.
 
-* **Tech:** n8n, Weather API, Gold API, News API, Gemini AI, **Custom Python**  
-* **Features:** Automated morning briefing with weather, markets, and news, including a custom market risk score.  
-* **Status:** ✅ Live and running  
-* **Code:** See n8n-workflows/ and src/python\_risk\_analysis.py.
+## **3\. Setup and Run Instructions**
 
-## **🎯 Day 180 Goal Project**
+1. **Clone the Repository:**  
+   git clone \[YOUR\_REPO\_URL\]  
+   cd \[YOUR\_REPO\_NAME\]
 
-**Smart Gold Investment Advisor**
+2. **Python:** Navigate to the python-practice/ directory and run the expense tracker:  
+   cd python-practice/  
+   python day3\_expense\_tracker.py
 
-* Real-time gold price monitoring  
-* AI-powered market analysis  
-* Actionable buy/hold/sell recommendations  
-* Integrated news sentiment analysis  
-* Production-ready web dashboard
-
-## **📚 Learning Resources**
-
-* CS50's Introduction to Programming with Python (Harvard)  
-* DeepLearning.AI courses  
-* n8n documentation  
-* Official API documentation
-
-## **📫 Connect With Me**
-
-LinkedIn: Mohamed Gaber  
-Email: mmgmahdi@gmail.com  
-Location: Cairo → Abu Dhabi (relocating)
+3. **n8n:** Import the n8n workflow JSON file (to be placed in the n8n-workflows/ directory) into your n8n instance and configure your LinkedIn OAuth credentials.
