@@ -1,56 +1,63 @@
-# **Project: AI Engineering Daily Progress Tracker**
+# **Project Title: Workflow Automation Backend**
 
-## **🚀 Overview**
+## **Overview**
 
-This repository documents my daily progress in the AI Engineering journey, focusing on two distinct tracks: **Foundational Python Development** and **Workflow Automation**.
+This project is a simple **Python FastAPI** application designed to serve as a backend service for an external workflow automation tool. The goal is to create a robust and secure API that can be consumed by other services to fetch data, execute tasks, and demonstrate seamless external API integration.
 
-It includes production-ready Python scripts for data handling and an automated low-code n8n workflow for content delivery.
+This README documents the journey so far (Days 1-4) and provides instructions for setting up and running the application.
 
-## **🛠️ Core Technologies & Structure**
+## **🚀 Getting Started**
 
-| Feature | Technologies Used | Directory |
-| :---- | :---- | :---- |
-| **Foundations** | Python (3.x), JSON, CSV | python-practice/ |
-| **Automation** | n8n, LinkedIn Marketing API, DevTools | n8n-workflows/ |
-| **Documentation** | Markdown, Git | Root Directory |
-| **Data Storage** | JSON, Excel (as source data) | data/ |
+### **Prerequisites**
 
-## **1\. Foundational Python Progress**
+To run this project locally, you will need:
 
-The focus has been on mastering data persistence, serialization, and creating utility applications.
+* **Python 3.8+**  
+* **ngrok** (to expose your local server to the internet)
 
-### **Key Applications & Skills Mastered:**
+### **Installation**
 
-* **Personal Finance Tracker (python-practice/day3\_expense\_tracker.py):**  
-  * A command-line application for tracking expenses.  
-  * **Skill:** Robust **JSON file handling** for data saving and loading.  
-  * **Skill:** Calculating and displaying a financial summary with breakdown by category.  
-* **Data Structures Practice (python-practice/day3\_data\_structures.py):**  
-  * **Skill:** Practical use of Lists, Dictionaries, and Sets for efficient data manipulation.
-
-## **2\. Workflow Automation (n8n & LinkedIn)**
-
-This track focuses on creating a fully automated system for publishing daily progress updates to LinkedIn.
-
-### **System Components:**
-
-1. **Daily Trigger:** Sets the workflow schedule (e.g., Cron job).  
-2. **Data Fetch:** Retrieves progress data (e.g., the JSON output from the Python expense tracker).  
-3. **Content Generation:** Uses an LLM to generate a professional, engaging LinkedIn post based on the fetched data.  
-4. **LinkedIn Post Node:** Publishes the finalized content.
-
-### **🔑 Technical Breakthrough: LinkedIn API User ID**
-
-The primary challenge was securely identifying the user for the posting node. We overcame this by using **DevTools deep debugging** to capture the specific /me? API endpoint. This allowed us to retrieve the non-public and essential urn:li:person:\[ID\] required to maintain a persistent, authorized connection for content posting.
-
-## **3\. Setup and Run Instructions**
-
-1. **Clone the Repository:**  
+1. **Clone the repository:**  
    git clone \[YOUR\_REPO\_URL\]  
-   cd \[YOUR\_REPO\_NAME\]
+   cd \[your-project-folder\]
 
-2. **Python:** Navigate to the python-practice/ directory and run the expense tracker:  
-   cd python-practice/  
-   python day3\_expense\_tracker.py
+2. **Create a virtual environment (Recommended):**  
+   python \-m venv venv  
+   source venv/bin/activate  \# On macOS/Linux  
+   .\\venv\\Scripts\\activate   \# On Windows
 
-3. **n8n:** Import the n8n workflow JSON file (to be placed in the n8n-workflows/ directory) into your n8n instance and configure your LinkedIn OAuth credentials.
+3. **Install dependencies:**  
+   pip install fastapi uvicorn
+
+### **Running the Server**
+
+1. Start the FastAPI server:  
+   The API will run on http://localhost:9000.  
+   python \-m uvicorn api\_server:app \--host 0.0.0.0 \--port 9000
+
+2. Expose the server with ngrok:  
+   In a new terminal window, use ngrok to create a public HTTPS tunnel to your local server.  
+   ngrok http 9000
+
+   This will provide you with a public URL (e.g., https://example-tunnel.ngrok-free.dev) that external tools can use to communicate with your application.
+
+## **🗓️ Development Log: Days 1 \- 4**
+
+### **Day 1 & 2: Project Setup and Initial Structure**
+
+* **Objective:** Define project goals, set up the development environment, and install core libraries (**FastAPI**, **Uvicorn**).  
+* **Result:** Established a basic project structure with api\_server.py. Successfully initialized and ran a simple "Hello, World" test endpoint to ensure the server was functioning correctly on a local port.
+
+### **Day 3: Defining the Service and Public Exposure**
+
+* **Objective:** Create the first functional endpoint (/skills) and integrate the server with **ngrok** to make it accessible to the external workflow automation tool.  
+* **Result:**  
+  * Implemented the /skills endpoint to return mock JSON data.  
+  * Successfully created an ngrok tunnel forwarding to http://localhost:9000.
+
+### **Day 4: Debugging the 404 Routing Issue**
+
+* **Objective:** Execute the first live test from the external workflow tool.  
+* **Result & Challenge:**  
+  * **Success:** Confirmed full external network connectivity via ngrok. The request successfully reached the ngrok URL and was forwarded to the local machine.  
+  * **Failure:** The FastAPI application responded with a persistent **404 Not Found** error for the /skills endpoint. Debugging confirmed the error originated from the application layer, suggesting a potential routing, code version, or process management conflict. This issue is paused and is the first task for Day 5\.

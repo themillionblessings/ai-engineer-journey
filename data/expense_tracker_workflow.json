@@ -1,0 +1,103 @@
+[
+  {
+    "nodes": [
+      {
+        "parameters": {
+          "authentication": "basic",
+          "httpMethod": "POST",
+          "path": "expense-entry"
+        },
+        "id": "e63a1c84-ce45-42a1-a7b3-8c4371b26829",
+        "name": "Start Workflow (Webhook)",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [
+          240,
+          300
+        ],
+        "credentials": {
+          "webhookAuth": "YOUR_N8N_WEBHOOK_CREDENTIAL_NAME"
+        }
+      },
+      {
+        "parameters": {
+          "resource": "sheet",
+          "operation": "append",
+          "spreadsheetId": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "options": {
+            "valueInputOption": "USER_ENTERED"
+          },
+          "dataToSend": "value",
+          "data": [
+            {
+              "columnName": "Date",
+              "value": "={{$json.body.date}}"
+            },
+            {
+              "columnName": "Amount",
+              "value": "={{$json.body.amount}}"
+            },
+            {
+              "columnName": "Category",
+              "value": "={{$json.body.category}}"
+            },
+            {
+              "columnName": "Description",
+              "value": "={{$json.body.description}}"
+            },
+            {
+              "columnName": "Source",
+              "value": "FastAPI"
+            }
+          ]
+        },
+        "id": "00a58a9e-f98b-402a-9e33-728b9c97b81e",
+        "name": "Google Sheets",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 1,
+        "position": [
+          640,
+          300
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": "YOUR_GOOGLE_SHEETS_CREDENTIAL_NAME"
+        }
+      },
+      {
+        "parameters": {
+          "jsonParameters": true,
+          "options": {
+            "statusCode": "200",
+            "responseData": "Expense recorded successfully!"
+          }
+        },
+        "id": "025e19e7-578d-4f1b-a53d-2495b6c23171",
+        "name": "Respond to Webhook",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1,
+        "position": [
+          840,
+          300
+        ]
+      }
+    ],
+    "connections": {
+      "Start Workflow (Webhook)": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main"
+          }
+        ]
+      ],
+      "Google Sheets": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  }
+]
